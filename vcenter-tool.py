@@ -4,7 +4,7 @@ from cmd import Cmd
 import sys
 import os
 import json
-import template_host
+import TemplateHost
 
 class VCTool(Cmd):
     prompt = 'vctool > '
@@ -24,11 +24,16 @@ class VCTool(Cmd):
                     host['hostname'],
                     host['description'],
                     host['os'])
-                self.templates.append(new_temp)
+                templates.append(new_temp)
             f.close()
-
+            self.templates = templates
     def preloop(self):
         self.get_templates_info()
+
+    def precmd(self, line):
+        self.get_templates_info()
+        return line
+
     def do_help(self, inp):
         print("1) host []\n   host add [host] [name] \n   host list \n   host current \n   host rm [name]")
         print("3) add vuln [host] [vuln] \n4) generate \n5) load [script] \n6) list vuln [host]")
@@ -103,6 +108,7 @@ class VCTool(Cmd):
         else:
             scr_name = input("Script name: ")
             print(f"Generating script {scr_name}...")
+            # Here, make host files
 
     def do_load(self, inp):
         options = inp.split()
