@@ -2,7 +2,7 @@
   "templates": [
     {
       "file": "template.laforge.tmpl",
-      "hostname": "{{ $.Hostname }}",
+      "hostname": "Sample",
       "description": "{{ $.Description }}",
       "os": "{{ $.OS }}"
     }
