@@ -1,0 +1,10 @@
+{
+  "templates": [
+    {
+      "file": "template.laforge.tmpl",
+      "hostname": "{{ $.Hostname }}",
+      "description": "{{ $.Description }}",
+      "os": "{{ $.OS }}"
+    }
+  ]
+}
