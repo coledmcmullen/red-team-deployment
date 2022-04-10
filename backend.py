@@ -6,9 +6,9 @@ from api_calls import *
 conf_path = "./api_conf.json"
 guest_creds = {
 	"interactive_session": True,
-	"password": "ufcptc2020!",
+	"password": "<GUEST_PASS>",
 	"type": "USERNAME_PASSWORD",
-	"user_name": "ufcptc"
+	"user_name": "<GUEST_USER>"
 }
 proc_spec = {
 	#"path": "/usr/bin/top"
