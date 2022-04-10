@@ -116,7 +116,7 @@ class VCTool(Cmd):
                     host = options[1]
                     # [Insert relevant actions with this information]
                 else:
-                    print("list vuln [host]")              
+                    print("list vuln [host]")
         else:
             print("usage: list vuln [host]")
 
@@ -147,9 +147,6 @@ class VCTool(Cmd):
             script = options[0]
             print("Loading script", script)
             # [Insert relevant actions with this information]
-            #TODO REMOVE---test only
-            testCalls()
-            #test only
 
     def do_exit(self, inp):
         print("Bye.")

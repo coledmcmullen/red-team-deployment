@@ -1,0 +1,7 @@
+{
+	"id": "vm-18106"
+	"name": "test_kali",
+	"type": "attack_host",
+	"powered_on": false,
+	"is_clone": false
+}

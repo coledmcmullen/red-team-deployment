@@ -2,4 +2,6 @@
 
 from backend import *
 
-testCalls()
+#addHost()
+testHostsModel()
+
