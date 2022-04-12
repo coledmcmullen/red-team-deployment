@@ -1,0 +1,122 @@
+#!/usr/bin/python3
+
+from cmd import Cmd
+import sys
+import os
+import json
+from backend import *
+
+class VCTool(Cmd):
+    prompt = 'rtdt > '
+    intro = "[ RED TEAM DEPLOYMENT TOOL ]\nType help for options.\nType exit or q to quit."
+    
+    ## Might be unecessary to hold onto host information
+    tg_hosts = []
+    atk_hosts = []
+
+    ## Uncomment to fill in startup functionality
+    #def startup(self):
+    #    # Any functions necessary on startup          
+    
+    #def preloop(self):
+    #    self.startup()
+
+    #def precmd(self, line):
+    #    self.startup()
+    #    return line
+
+    ## List of commands
+    def do_help(self, inp):
+        print("1) host []\n   host add target [template] [name] \n   host add attack [name] \n   host list \n   host rm [name]")
+        print("2) generate \n3) load")
+
+    ## All host related actions: add host, list hosts available, list current hosts, and remove host
+    def do_host(self, inp):
+        options = inp.split()
+        if len(options) > 0:
+            # vuln or host
+            if options[0] == 'add':
+                if len(options) > 3 and options[1] == 'target':
+                    template, name = options[2:4]
+                    self.tg_hosts.append((template, name))
+                    # Check if template exists, and if name is unique?
+                    
+                elif len(options) > 2 and options[1] == 'attack':
+                    name = options[2]
+                    self.atk_hosts.append(name)
+                else:
+                    print("usage: host add target [template] [name] \n host add attack [name] \n")
+
+            elif options[0] == 'list':
+                for t in self.tg_hosts:
+                    print(f"\nTarget Host: {t[1]}\nTemplate: {t[0]}")
+                    print("--------------------------------------------------")
+                for a in self.atk_hosts:
+                    print(f"\nAttack Host: {a}")
+                    print("--------------------------------------------------")
+
+            elif options[0] == 'rm':
+                if len(options) > 1:
+                    name = options[1]
+                    rm_host = None
+                    
+                    if len(self.tg_hosts) > 0:
+                        for t in self.tg_hosts:
+                            if t[1] == name:
+                                rm_host = t
+                                self.tg_hosts.remove(t)
+                                break
+                    if len(self.atk_hosts) > 0:
+                        for a in self.atk_hosts:
+                            if a == name:
+                                rm_host = a
+                                self.atk_hosts.remove(a)
+                                break
+
+                    if rm_host is None:
+                        print("Unable to remove host.")
+                else:
+                    print("usage: host rm [name]")
+            else:
+                print("Type help for options.")
+        else:
+            print("usage: host []\n   host add target [template] [name] \n   host add attack [name] \n   host list \n   host rm [name]")
+
+    ## Generate
+    def do_generate(self, inp):
+        print("Hosts:")
+        if len(self.tg_hosts) > 0:
+            for t in self.tg_hosts:
+                print(f"{t[1]}: {t[0]}")
+        if len(self.atk_hosts) > 0:
+            for a in self.atk_hosts:
+                print(f"{a}")
+        else:
+            print("No hosts.")
+        
+        if_gen = input("Would you like to generate a network with this information? (y/n): ")
+        if if_gen.lower() == 'n' or if_gen.lower() != 'y':
+            print("Not generating a network.")
+        else:
+            print(f"Generating...")
+
+    ## Load
+    def do_load(self, inp):
+        print("Loading...")
+        # [Insert relevant actions]    
+    
+    ## Exit the tool
+    def do_exit(self, inp):
+        print("Bye.")
+        return True
+
+    def default(self, inp):
+        if inp == 'q':
+            return self.do_exit(inp)
+
+    do_EOF = do_exit
+
+if len(sys.argv) > 1:
+    VCTool().onecmd(' '.join(sys.argv[1:]))
+else:
+    VCTool().cmdloop()
