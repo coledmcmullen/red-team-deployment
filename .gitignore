@@ -1,4 +1,6 @@
-api_conf
+api_conf.json
+hosts.json
+guest_login.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
