@@ -3,22 +3,21 @@
 from api_calls import *
 
 #API configuration file relative path
-conf_path = "./api_conf"
+conf_path = "./api_conf.json"
+#Hosts File relative path
+hosts_path = "./hosts.json"
+#Guest login file relative path
+guest_path = "./guest_login.json"
 
-#TODO isolate into file
-#guest_conf_path = ""
-guest_login = {
-	"interactive_session": True,
-	"password": "<GUEST_PASS>",
-	"type": "USERNAME_PASSWORD",
-	"user_name": "<GUEST_USER>"
-}
-#TODO support optional spec args
+#Remove
 proc_spec = {
 	"path": "/usr/lib/firefox-esr/firefox-esr"
 }
 
-def loadConf(fpath):
+def printError(err):
+	print("Error: %s" % err)
+
+def loadFile(fpath):
 	#conf =
 	try:
 		f = open(fpath)
@@ -30,40 +29,30 @@ def loadConf(fpath):
 		return -1
 	return conf
 
-def writeConf(fpath, data):
+def writeFile(fpath, data):
 	try:
 		f = open(fpath, "w")
 		f.write(data)
 		f.close()
 	except Exception as e:
-		#TODO
+		#TODO handle
 		printError(e)
 		return -1
 	return 0
 
 def init():
-	conf = loadConf(conf_path)
+	conf = loadFile(conf_path)
+	hosts = loadFile(hosts_path)
 	#if(conf["session_token"] == "" or conf["session_token"] == -1):
-	#conf["session_token"] = getSessionToken(conf["api_base"], conf["creds"])
+	conf["session_token"] = getSessionToken(conf["api_base"], conf["creds"])
 	#writeConf(conf_path, json.dumps(conf, indent = 4))
-	return conf
-
-def testHostsModel():
-	#hosts = []
-	hosts = [loadConf("target2.json")]
-	print(hosts[0], hosts)
-	hosts[0]["id"] = 2
-	print(hosts[0], hosts)
-	hosts[0]["name"] = "target"
-	writeConf("target.json", json.dumps(hosts[0], indent = 4))
+	return conf, hosts
 
 def testCalls():
 	conf = init()
 	#test_resp = getVMIDs(conf["api_base"], conf["session_token"], ["test_target"])
-	test_id = test_resp[0]["vm"]
+	#test_id = test_resp[0]["vm"]
 	#test_resp = listVMFolder(conf["api_base"], conf["session_token"], ["Spring_2022_Laforge_Senior_Project"])
-	#print(test_resp)
-	#print(test_id)
 	#print(getVMInfo(conf["api_base"], conf["session_token"], test_id))
 	#print(getVMInfo(conf["api_base"], conf["session_token"], ["rtdt_live"]))
 	#print(powerOffVM(conf["api_base"], conf["session_token"], test_id))
@@ -71,34 +60,108 @@ def testCalls():
 	#print(cloneVM(conf["api_base"], conf["session_token"], test_id, "test_target"))
 	#print(deleteVM(conf["api_base"], conf["session_token"], test_id))
 	#test_resp = startVMProcess(conf["api_base"], conf["session_token"], test_id, guest_login, proc_spec)
-	#print(test_resp)
 
-def addHost(source_name, clone_name):
-	resp = getVMIDs(conf["api_base"], conf["session_token"], source_name)
-	#TODO - check getID success
-		source_id = resp[0]["vm"]
-		resp = cloneVM(conf["api_base"], conf["session_token"], source_id, clone_name)
 
+def addHost(conf, hosts, source_name, clone_name):
+	#Elevate
+	#conf, hosts = init()
+	source_id = -1
+	clone_id = -1
+
+	#TODO - Check clone name not already used in vCenter
+
+	#Retrieve source id by source name
+	for h in hosts:
+		if(h["name"] == source_name):
+			source_id = h["id"]
+		elif(h["name"] == clone_name):
+			clone_id = h["id"]
+
+	if(source_id == -1):
+		resp = getVMIDs(conf["api_base"], conf["session_token"], source_id)
 		if(resp.status_code == 200):
-			print("Adding host %s..." % clone_name)
-			#write new host json
-		else:
-			print("Failed to add host %s" % clone_name)
+			source_id = resp[0]["vm"]
 
-#def removeHost(conf, host_name):
-	resp = getVMIDs(conf["api_base"], conf["session_token"], host_name)
-	host_id = resp[0]["vm"]
-	#TODO - check getID success
-		resp = deleteVM(conf["api_base"], conf["session_token"], host_id)
-		if resp.status_code == 204:
-			#remove host from hosts array
-			#delete json file
-		else:
-			#print err
+	#TODO handle non-success response codes
+
+	if(source_id != -1):
+		hosts.append({"id": "", "name": clone_name, "type": source_id, "powered_on": False, "is_template": False})
+
+	#Debug only
+	print("Added host {} of type {}/{} to model; ready to generate...".format(clone_name, source_name, source_id))
 
 
-#def addVuln(conf, host_name, service):
-	resp = getVMIDs(conf["api_base"], conf["session_token"], host_name)
-	host_id = resp[0]["vm"]
-	#TODO - check getID success
-		resp = startVMProcess(conf["api_base"], conf["session_token"], host_id, guest_login)
+def removeHost(conf, hosts, host_name):
+	#Elevate
+	#conf, hosts = init()
+	host_id = -1
+
+	#Retrieve source id from hosts model
+	for h in hosts:
+		if(h["name"] == host_name):
+			host_id = h["id"]
+
+	#If not, get from API
+	if(host_id == -1):
+		try:
+			resp = getVMIDs(conf["api_base"], conf["session_token"], host_name)
+			host_id = resp[0]["vm"]
+
+		except Exception as err:
+			printError(err)
+			printError("VM ID was not found")
+
+	resp = deleteVM(conf["api_base"], conf["session_token"], host_id)
+
+	if(resp.status_code == 204):
+		for h in hosts:
+			if(h["id"] == host_id):
+				hosts.remove(h)
+		print("Successfully deleted %s" % hostname)
+	else:
+		print("Failed to remove host %s" % hostname)
+		#TODO handle err?
+
+def generateModel(conf, hosts):
+	#conf, hosts = init()
+
+	for h in hosts:
+		#TODO move host removal here
+
+		#deploy host if not yet deployed
+		if(getVMIDs(conf["api_base"], conf["session_token"], h["name"]) == []):
+			try:
+				resp = cloneVM(conf["api_base"], conf["session_token"], h["type"], h["name"])
+				#check status code?
+				h["id"] = resp.json()
+				print("Deployed host {} with id {}".format(h["name"], h["id"]))
+
+				writeFile(hosts_path, json.dumps(hosts, indent = 4))
+				#Debug only
+				print(resp)
+
+			except Exception as err:
+				#Debug only
+				printError("Host {} failed to deploy from source {}".format(h["name"], h["type"]))
+				#TODO - handle clone failure
+				printError(err)
+
+def loadModel(conf, hosts):
+	#hosts = []
+	#conf, hosts = init()
+
+	for h in hosts:
+		id = getVMIDs(conf["api_base"], conf["session_token"], h["name"])
+		h["id"] = id[0]["vm"]
+		#TODO add attribute if not found
+		if(id["power_state"] == "POWERED_ON"):
+			h["powered_on"] = True
+		elif(id["power_state"] == "POWERED_OFF"):
+			h["powered_on"] = False
+
+		#TODO determine type - possibly pull descriptions of VM
+		#TODO determine if template
+
+	print("Hosts loaded:\n", hosts)
+
+	writeFile(hosts_path, json.dumps(hosts, indent = 4))

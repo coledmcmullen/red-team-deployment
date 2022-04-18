@@ -2,6 +2,9 @@
 
 from backend import *
 
-#addHost()
-testHostsModel()
+conf, hosts = init()
 
+#addHost(conf, hosts, "test_target", "clone1")
+#loadModel(conf, hosts)
+#generateModel(conf, hosts)
+removeHost(conf, hosts, "clone1")

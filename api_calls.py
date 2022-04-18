@@ -2,25 +2,20 @@
 
 import requests
 import json
-#import logging
-
-#logging.captureWarnings(True)
-
 
 def printError(err):
-	print("Error: %s" % err)
-
+        print("Error: %s" % err)
 
 def getSessionToken(api_base, api_creds):
 	sess = requests.post("{}/api/session".format(api_base), auth = (api_creds["user"], api_creds["password"]), verify = True)
-	
+
 	if(sess.status_code == 201):
 		print("Retrieved new session token")
 	else:
 		#TODO
 		printError("Failed to get session token")
 		#return -1
-	
+
 	return sess.json()
 
 
@@ -36,7 +31,6 @@ def getVMIDs(api_base, session_tok, vm_names):
 	print(resp.status_code)
 	#return just ID or entire json to caller? Restrict to singular ID or allow multiple ID retrieval?
 	return resp.json()
-
 
 def listVMFolder(api_base, session_tok, vm_folders):
 	resp = requests.get("{}/api/vcenter/vm".format(api_base), verify = True, headers = {
@@ -54,7 +48,6 @@ def listVMFolder(api_base, session_tok, vm_folders):
 
 
 #def createVM():
-	#TODO?
 
 
 def cloneVM(api_base, session_tok, source_id, clone_name):
@@ -111,8 +104,8 @@ def startVMProcess(api_base, session_tok, vm_id, guest_login, proc_spec):
 	#Remove
 	print(resp.status_code)
 	return resp.json()
-	
-	
+
+
 def killVMProcess(api_base, session_tok, vm_id, guest_login, pid):
 	resp = requests.post("{}/api/vcenter/vm/{}/guest/processes/{}?action=delete".format(api_base, vm_id, pid), verify = True, headers = {
 		"vmware-api-session-id": session_tok
