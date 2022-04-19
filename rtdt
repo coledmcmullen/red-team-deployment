@@ -9,14 +9,14 @@ from backend import *
 class VCTool(Cmd):
     prompt = 'rtdt > '
     intro = "[ RED TEAM DEPLOYMENT TOOL ]\nType help for options.\nType exit or q to quit."
-    
+
     hosts = None
     conf = None
 
     def startup(self):
         # Any functions necessary on startup
-        self.conf, self.hosts = init()          
-    
+        self.conf, self.hosts = init()
+
     def preloop(self):
         self.startup()
 
@@ -37,12 +37,12 @@ class VCTool(Cmd):
             if options[0] == 'add':
                 if len(options) > 3 and options[1] == 'target':
                     template, name = options[2:4]
-                    addHost(self.conf, self.hosts, template, name)                    
-                    
+                    hosts = addHost(self.conf, self.hosts, template, name)
+
                 elif len(options) > 2 and options[1] == 'attack':
                     name = options[2]
                     # Default attack host source name
-                    addHost(self.conf, self.hosts, "test_kali", name)
+                    hosts = addHost(self.conf, self.hosts, "test_kali", name)
 
                 else:
                     print("usage: host add target [template] [name] \n host add attack [name] \n")
@@ -55,8 +55,8 @@ class VCTool(Cmd):
             elif options[0] == 'rm':
                 if len(options) > 1:
                     name = options[1]
-                    removeHost(self.conf, self.hosts, name)
-                    
+                    hosts = removeHost(self.conf, self.hosts, name)
+
                 else:
                     print("usage: host rm [name]")
             else:
@@ -79,12 +79,12 @@ class VCTool(Cmd):
             print("Not generating a model.")
         else:
             print(f"Generating...")
-            generateModel(self.conf, self.hosts)
+            hosts = generateModel(self.conf, self.hosts)
 
     ## Load
     def do_load(self, inp):
         print("Loading...")
-        loadModel(self.conf, self.hosts)    
+        hosts = loadModel(self.conf, self.hosts)    
     
     ## Exit the tool
     def do_exit(self, inp):

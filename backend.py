@@ -61,10 +61,7 @@ def testCalls():
 	#print(deleteVM(conf["api_base"], conf["session_token"], test_id))
 	#test_resp = startVMProcess(conf["api_base"], conf["session_token"], test_id, guest_login, proc_spec)
 
-
 def addHost(conf, hosts, source_name, clone_name):
-	#Elevate
-	#conf, hosts = init()
 	source_id = -1
 	clone_id = -1
 
@@ -87,19 +84,21 @@ def addHost(conf, hosts, source_name, clone_name):
 	if(source_id != -1):
 		hosts.append({"id": "", "name": clone_name, "type": source_id, "powered_on": False, "is_template": False})
 
-	#Debug only
+	writeFile(hosts_path, json.dumps(hosts, indent = 4))
+	#Debug only?
 	print("Added host {} of type {}/{} to model; ready to generate...".format(clone_name, source_name, source_id))
-
+	return hosts
 
 def removeHost(conf, hosts, host_name):
-	#Elevate
-	#conf, hosts = init()
 	host_id = -1
 
 	#Retrieve source id from hosts model
 	for h in hosts:
 		if(h["name"] == host_name):
 			host_id = h["id"]
+			if(h["is_template"] == True):
+				printError("Cannot remove template")
+				return hosts
 
 	#If not, get from API
 	if(host_id == -1):
@@ -111,20 +110,24 @@ def removeHost(conf, hosts, host_name):
 			printError(err)
 			printError("VM ID was not found")
 
-	resp = deleteVM(conf["api_base"], conf["session_token"], host_id)
+	#Check vm is not template if retrieved
+	resp1 = powerOffVM(conf["api_base"], conf["session_token"], host_id)
+	#Check power off was successful
+	resp2 = deleteVM(conf["api_base"], conf["session_token"], host_id)
 
-	if(resp.status_code == 204):
+	if(resp2.status_code == 204):
 		for h in hosts:
 			if(h["id"] == host_id):
 				hosts.remove(h)
-		print("Successfully deleted %s" % hostname)
+		print("Successfully deleted %s" % host_name)
 	else:
-		print("Failed to remove host %s" % hostname)
+		print("Failed to remove host %s" % host_name)
 		#TODO handle err?
 
-def generateModel(conf, hosts):
-	#conf, hosts = init()
+	writeFile(hosts_path, json.dumps(hosts, indent = 4))
+	return hosts
 
+def generateModel(conf, hosts):
 	for h in hosts:
 		#TODO move host removal here
 
@@ -132,24 +135,26 @@ def generateModel(conf, hosts):
 		if(getVMIDs(conf["api_base"], conf["session_token"], h["name"]) == []):
 			try:
 				resp = cloneVM(conf["api_base"], conf["session_token"], h["type"], h["name"])
-				#check status code?
-				h["id"] = resp.json()
-				print("Deployed host {} with id {}".format(h["name"], h["id"]))
-
-				writeFile(hosts_path, json.dumps(hosts, indent = 4))
-				#Debug only
-				print(resp)
-
 			except Exception as err:
-				#Debug only
+				#Debug only?
 				printError("Host {} failed to deploy from source {}".format(h["name"], h["type"]))
 				#TODO - handle clone failure
 				printError(err)
+				return hosts
+
+			if(resp.status_code == 200):
+				h["id"] = resp.json()
+				h["powered_on"] = True
+				print("Deployed host {} with id {}".format(h["name"], h["id"]))
+
+				writeFile(hosts_path, json.dumps(hosts, indent = 4))
+				#Debug only -- Remove
+				print(resp)
+			#else:
+				#Move err message?
+	return hosts
 
 def loadModel(conf, hosts):
-	#hosts = []
-	#conf, hosts = init()
-
 	for h in hosts:
 		id = getVMIDs(conf["api_base"], conf["session_token"], h["name"])
 		h["id"] = id[0]["vm"]
@@ -165,3 +170,4 @@ def loadModel(conf, hosts):
 	print("Hosts loaded:\n", hosts)
 
 	writeFile(hosts_path, json.dumps(hosts, indent = 4))
+	return hosts
