@@ -10,12 +10,15 @@ class VCTool(Cmd):
     prompt = 'rtdt > '
     intro = "[ RED TEAM DEPLOYMENT TOOL ]\nType help for options.\nType exit or q to quit."
 
+    startupComplete = False
     hosts = None
     conf = None
 
     def startup(self):
         # Any functions necessary on startup
-        self.conf, self.hosts = init()
+        if self.startupComplete is False:
+            self.conf, self.hosts = init()
+            self.startupComplete = True
 
     def preloop(self):
         self.startup()
