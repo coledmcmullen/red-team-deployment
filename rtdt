@@ -52,7 +52,7 @@ class VCTool(Cmd):
 
             elif options[0] == 'list':
                 for h in self.hosts:
-                    print(f"\nHost: {h['name']}\nTemplate: {h['id']}")
+                    print(f"\nHost: {h['name']}\nType: {h['type']}")
                     print("--------------------------------------------------")
 
             elif options[0] == 'rm':
