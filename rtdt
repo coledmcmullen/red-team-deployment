@@ -10,9 +10,8 @@ class VCTool(Cmd):
     prompt = 'rtdt > '
     intro = "[ RED TEAM DEPLOYMENT TOOL ]\nType help for options.\nType exit or q to quit."
     
-    ## Might be unecessary to hold onto host information
-    hosts = []
-    conf = []
+    hosts = None
+    conf = None
 
     def startup(self):
         # Any functions necessary on startup
@@ -38,34 +37,25 @@ class VCTool(Cmd):
             if options[0] == 'add':
                 if len(options) > 3 and options[1] == 'target':
                     template, name = options[2:4]
-                    self.hosts.append((template, name))
-                    # Check if template exists, and if name is unique?
+                    addHost(self.conf, self.hosts, template, name)                    
                     
                 elif len(options) > 2 and options[1] == 'attack':
                     name = options[2]
-                    self.hosts.append(name)
+                    #addHost(self.conf, self.hosts, ?, name)
+
                 else:
                     print("usage: host add target [template] [name] \n host add attack [name] \n")
 
             elif options[0] == 'list':
                 for h in self.hosts:
-                    print(f"\nTarget Host: {t[1]}\nTemplate: {t[0]}")
+                    print(f"\nHost: {h['name']}\nTemplate: {h['id']}")
                     print("--------------------------------------------------")
 
             elif options[0] == 'rm':
                 if len(options) > 1:
                     name = options[1]
-                    rm_host = None
+                    removeHost(self.conf, self.hosts, name)
                     
-                    if len(self.hosts) > 0:
-                        for a in self.hosts:
-                            if a == name:
-                                rm_host = a
-                                self.hosts.remove(a)
-                                break
-
-                    if rm_host is None:
-                        print("Unable to remove host.")
                 else:
                     print("usage: host rm [name]")
             else:
@@ -77,22 +67,23 @@ class VCTool(Cmd):
     def do_generate(self, inp):
         print("Hosts:")
         if len(self.hosts) > 0:
-            for t in self.hosts:
-                print(f"{t[1]}: {t[0]}")
+            for h in self.hosts:
+                print(f"{h['name']}: {h['id']}")
   
         else:
             print("No hosts.")
         
-        if_gen = input("Would you like to generate a network with this information? (y/n): ")
+        if_gen = input("Would you like to generate a model with this information? (y/n): ")
         if if_gen.lower() == 'n' or if_gen.lower() != 'y':
-            print("Not generating a network.")
+            print("Not generating a model.")
         else:
             print(f"Generating...")
+            generateModel(self.conf, self.hosts)
 
     ## Load
     def do_load(self, inp):
         print("Loading...")
-        # [Insert relevant actions]    
+        loadModel(self.conf, self.hosts)    
     
     ## Exit the tool
     def do_exit(self, inp):
