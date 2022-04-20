@@ -148,8 +148,6 @@ def generateModel(conf, hosts):
 				print("Deployed host {} with id {}".format(h["name"], h["id"]))
 
 				writeFile(hosts_path, json.dumps(hosts, indent = 4))
-				#Debug only -- Remove
-				print(resp)
 			#else:
 				#Move err message?
 	return hosts
