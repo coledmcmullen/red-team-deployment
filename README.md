@@ -17,6 +17,7 @@ A JSON file containing the API base and API account credentials must be located 
   
 #### hosts.json
 A JSON file containing the list of hosts must be located at './hosts.json' with the following format:
+    
     [{
         "id": "vm-XXXXX",
         "name": <HOST NAME>,
