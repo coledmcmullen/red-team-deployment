@@ -31,27 +31,29 @@ Hosts.json is managed by the tool and should not need editing or alteration.
 If hosts.json is lost or corrupted, create a new hosts.json as follows with the hostnames that should be tracked:
 
 [
-    {
-        "id": "",
-        "name": <HOST NAME 1>,
-        "type": "",
-        "powered_on": false,
-        "is_template": false
-    },
-    {
-        "id": "",
-        "name": <HOST NAME 2>,
-        "type": "",
-        "powered_on": false,
-        "is_template": false
-    },
-    {
-        "id": "",
-        "name": "<HOST NAME 3>",
-        "type": "",
-        "powered_on": false,
-        "is_template": false
-    }
+
+        {
+            "id": "",
+            "name": <HOST NAME 1>,
+            "type": "",
+            "powered_on": false,
+            "is_template": false
+        },
+        {
+            "id": "",
+            "name": <HOST NAME 2>,
+            "type": "",
+            "powered_on": false,
+            "is_template": false
+        },
+        {
+        
+            "id": "", 
+            "name": "<HOST NAME 3>",
+            "type": "", 
+            "powered_on": false, 
+            "is_template": false
+        }
 ]
   
 Then start the tool and run the load command; details for each host will be populated from vCenter.
