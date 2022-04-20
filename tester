@@ -4,7 +4,7 @@ from backend import *
 
 conf, hosts = init()
 
-#addHost(conf, hosts, "test_target", "clone1")
+addHost(conf, hosts, "test_target", "clone1")
 #loadModel(conf, hosts)
-#generateModel(conf, hosts)
-removeHost(conf, hosts, "clone1")
+generateModel(conf, hosts)
+#removeHost(conf, hosts, "clone1")

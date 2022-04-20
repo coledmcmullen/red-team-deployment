@@ -157,9 +157,9 @@ def loadModel(conf, hosts):
 		id = getVMIDs(conf["api_base"], conf["session_token"], h["name"])
 		h["id"] = id[0]["vm"]
 		#TODO add attribute if not found
-		if(id["power_state"] == "POWERED_ON"):
+		if(id[0]["power_state"] == "POWERED_ON"):
 			h["powered_on"] = True
-		elif(id["power_state"] == "POWERED_OFF"):
+		elif(id[0]["power_state"] == "POWERED_OFF"):
 			h["powered_on"] = False
 
 		#TODO determine type - possibly pull descriptions of VM
