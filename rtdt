@@ -45,7 +45,7 @@ class VCTool(Cmd):
                 elif len(options) > 2 and options[1] == 'attack':
                     name = options[2]
                     # Default attack host source name
-                    hosts = addHost(self.conf, self.hosts, "test_kali", name)
+                    hosts = addHost(self.conf, self.hosts, "Attack_base", name)
 
                 else:
                     print("usage: host add target [template] [name] \n host add attack [name] \n")
