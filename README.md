@@ -52,4 +52,4 @@ If hosts.json is lost or corrupted, create a new hosts.json as follows with the 
         "is_template": false
     }]
   
-Then start the tool and run the load command; details for each host will be populated from vCenter.
+Then start the tool and run the load command; details for each host will be populated from vCenter. 
