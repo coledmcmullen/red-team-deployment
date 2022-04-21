@@ -9,21 +9,23 @@ from backend import *
 class VCTool(Cmd):
     prompt = 'rtdt > '
     intro = "[ RED TEAM DEPLOYMENT TOOL ]\nType help for options.\nType exit or q to quit."
-    
-    ## Might be unecessary to hold onto host information
-    tg_hosts = []
-    atk_hosts = []
 
-    ## Uncomment to fill in startup functionality
-    #def startup(self):
-    #    # Any functions necessary on startup          
-    
-    #def preloop(self):
-    #    self.startup()
+    startupComplete = False
+    hosts = None
+    conf = None
 
-    #def precmd(self, line):
-    #    self.startup()
-    #    return line
+    def startup(self):
+        # Any functions necessary on startup
+        if self.startupComplete is False:
+            self.conf, self.hosts = init()
+            self.startupComplete = True
+
+    def preloop(self):
+        self.startup()
+
+    def precmd(self, line):
+        self.startup()
+        return line
 
     ## List of commands
     def do_help(self, inp):
@@ -38,43 +40,26 @@ class VCTool(Cmd):
             if options[0] == 'add':
                 if len(options) > 3 and options[1] == 'target':
                     template, name = options[2:4]
-                    self.tg_hosts.append((template, name))
-                    # Check if template exists, and if name is unique?
-                    
+                    hosts = addHost(self.conf, self.hosts, template, name)
+
                 elif len(options) > 2 and options[1] == 'attack':
                     name = options[2]
-                    self.atk_hosts.append(name)
+                    # Default attack host source name
+                    hosts = addHost(self.conf, self.hosts, "Attack_base", name)
+
                 else:
                     print("usage: host add target [template] [name] \n host add attack [name] \n")
 
             elif options[0] == 'list':
-                for t in self.tg_hosts:
-                    print(f"\nTarget Host: {t[1]}\nTemplate: {t[0]}")
-                    print("--------------------------------------------------")
-                for a in self.atk_hosts:
-                    print(f"\nAttack Host: {a}")
+                for h in self.hosts:
+                    print(f"\nHost: {h['name']}\nType: {h['type']}")
                     print("--------------------------------------------------")
 
             elif options[0] == 'rm':
                 if len(options) > 1:
                     name = options[1]
-                    rm_host = None
-                    
-                    if len(self.tg_hosts) > 0:
-                        for t in self.tg_hosts:
-                            if t[1] == name:
-                                rm_host = t
-                                self.tg_hosts.remove(t)
-                                break
-                    if len(self.atk_hosts) > 0:
-                        for a in self.atk_hosts:
-                            if a == name:
-                                rm_host = a
-                                self.atk_hosts.remove(a)
-                                break
+                    hosts = removeHost(self.conf, self.hosts, name)
 
-                    if rm_host is None:
-                        print("Unable to remove host.")
                 else:
                     print("usage: host rm [name]")
             else:
@@ -85,25 +70,24 @@ class VCTool(Cmd):
     ## Generate
     def do_generate(self, inp):
         print("Hosts:")
-        if len(self.tg_hosts) > 0:
-            for t in self.tg_hosts:
-                print(f"{t[1]}: {t[0]}")
-        if len(self.atk_hosts) > 0:
-            for a in self.atk_hosts:
-                print(f"{a}")
+        if len(self.hosts) > 0:
+            for h in self.hosts:
+                print(f"{h['name']}: {h['id']}")
+  
         else:
             print("No hosts.")
         
-        if_gen = input("Would you like to generate a network with this information? (y/n): ")
+        if_gen = input("Would you like to generate a model with this information? (y/n): ")
         if if_gen.lower() == 'n' or if_gen.lower() != 'y':
-            print("Not generating a network.")
+            print("Not generating a model.")
         else:
             print(f"Generating...")
+            hosts = generateModel(self.conf, self.hosts)
 
     ## Load
     def do_load(self, inp):
         print("Loading...")
-        # [Insert relevant actions]    
+        hosts = loadModel(self.conf, self.hosts)    
     
     ## Exit the tool
     def do_exit(self, inp):
